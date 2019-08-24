@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CardRepository")
@@ -18,21 +19,24 @@ class Card
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("user")
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("user")
      */
     private $creditCardType;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string")
      */
     private $creditCardNumber;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("user")
      */
     private $currencyCode;
 
@@ -76,7 +80,7 @@ class Card
         return $this;
     }
 
-    public function getCreditCardNumber(): ?int
+    public function getCreditCardNumber(): ?string
     {
         return $this->creditCardNumber;
     }

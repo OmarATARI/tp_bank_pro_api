@@ -5,13 +5,19 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @UniqueEntity("email")
  */
-class User
+class User implements UserInterface
 {
     /**
+     * @Groups("user")
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
@@ -19,26 +25,34 @@ class User
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("user")
+     * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=0, max=10)
      */
     private $firstName;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("user")
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $lastName;
 
     /**
+     * @Groups("user")
      * @ORM\Column(type="string", length=255)
+     * @Assert\Email()
      */
     private $email;
 
     /**
+     * @Groups("user")
      * @ORM\Column(type="string", length=255)
      */
     private $apiKey;
 
     /**
+     * @Groups("user")
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
@@ -49,26 +63,39 @@ class User
     private $address;
 
     /**
+     * @Groups("user")
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $country;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Subscription")
+     * @Groups("user")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Subscription", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
+
      */
     private $subscription;
 
     /**
+     * @Groups("user")
      * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="user", orphanRemoval=true)
      */
     private $cards;
 
+    /**
+     * @Groups("user")
+     * @ORM\Column(type="simple_array")
+     */
+    private $roles = [];
+
+
 
     public function __construct()
     {
+        $this->roles = array('ROLE_USER');
         $this->cards = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -111,6 +138,10 @@ class User
         return $this;
     }
 
+    /**
+     * @return string|null
+     * @Assert\NotBlank()
+     */
     public function getApiKey(): ?string
     {
         return $this->apiKey;
@@ -198,6 +229,41 @@ class User
                 $card->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+
+    // ================================== USERINTERFACE METHODS
+
+    public function getRoles()
+    {
+        // TODO: Implement getRoles() method.
+    }
+
+    public function getPassword()
+    {
+        // TODO: Implement getPassword() method.
+    }
+
+    public function getSalt()
+    {
+        // TODO: Implement getSalt() method.
+    }
+
+    public function getUsername()
+    {
+        // TODO: Implement getUsername() method.
+    }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
 
         return $this;
     }
