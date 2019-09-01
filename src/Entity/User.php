@@ -49,7 +49,7 @@ class User implements UserInterface
 
     /**
      * @Groups("userProfile")
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $apiKey;
 
@@ -263,7 +263,7 @@ class User implements UserInterface
     }
 
 
-    // ================================== USERINTERFACE METHODS
+    // ================================== UserInterface mandatory methods
 
     public function getRoles()
     {
@@ -277,6 +277,11 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getUsername()
+    {
+        return $this->email;
+    }
+
 
     public function getPassword()
     {
@@ -286,11 +291,6 @@ class User implements UserInterface
     public function getSalt()
     {
         // TODO: Implement getSalt() method.
-    }
-
-    public function getUsername()
-    {
-        // TODO: Implement getUsername() method.
     }
 
     public function eraseCredentials()

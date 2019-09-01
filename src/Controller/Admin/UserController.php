@@ -1,7 +1,8 @@
 <?php
 
 
-namespace App\Controller;
+namespace App\Controller\Admin;
+
 
 use App\Entity\User;
 use App\Repository\SubscriptionRepository;
@@ -9,11 +10,10 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\View\View;
 
-
-class UserIndexController extends AbstractFOSRestController
+class UserController extends AbstractFOSRestController
 {
+
     private $userRepository;
     private $subscriptionRepo;
     private $em;
@@ -26,23 +26,15 @@ class UserIndexController extends AbstractFOSRestController
     }
 
     /**
-     * @Rest\Get("/api/users")
-     * @Rest\View(serializerGroups={"userIndex"})
+     * @Rest\Delete("/api/admin/users/{email}")
+     * @Rest\View(serializerGroups={"userProfile"})
+     * @param User $user
      */
-    public function getApiUsers()
+    public function deleteApiUser(User $user)
     {
-        $users = $this->userRepository->findAll();
-        return $this->view($users);
+        /** @var User $user */
+        $this->em->remove($user);
+        $this->em->flush();
     }
 
-    /**
-     * @Rest\Get("/api/users/{email}")
-     * @param User $user
-     * @return View
-     * @Rest\View(serializerGroups={"userIndex"})
-     */
-    public function getApiUser(User $user)
-    {
-        return $this->view($user);
-    }
 }

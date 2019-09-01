@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Card
 {
     /**
+     * @Groups("userProfile")
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")

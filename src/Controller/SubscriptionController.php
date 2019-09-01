@@ -4,19 +4,13 @@
 namespace App\Controller;
 
 
-use App\Entity\User;
-use App\Repository\CardRepository;
+use App\Entity\Subscription;
 use App\Repository\SubscriptionRepository;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
-use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\View\View;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Validator\ConstraintViolation;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use FOS\RestBundle\Controller\Annotations as Rest;
+
 
 class SubscriptionController extends AbstractFOSRestController
 {
@@ -36,5 +30,16 @@ class SubscriptionController extends AbstractFOSRestController
     {
         $subscriptions = $this->subscriptionRepository->findAll();
         return $this->view($subscriptions);
+    }
+
+
+    /**
+     * @Rest\Get("/api/subscriptions/{slug}")
+     * @param Subscription $subscription
+     * @return View
+     */
+    public function getApiUser(Subscription $subscription)
+    {
+        return $this->view($subscription);
     }
 }

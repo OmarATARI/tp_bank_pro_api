@@ -37,6 +37,13 @@ class Subscription
      */
     private $url;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=false)
+     * @Groups("userIndex")
+     */
+    private $slug;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,5 +83,15 @@ class Subscription
         $this->url = $url;
 
         return $this;
+    }
+
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    public function setSlug($slug): void
+    {
+        $this->slug = $slug;
     }
 }
