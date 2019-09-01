@@ -4,7 +4,6 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\CardRepository;
 use App\Repository\SubscriptionRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,20 +18,22 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
-class UserController extends AbstractFOSRestController
+class UserIndexController extends AbstractFOSRestController
 {
     private $userRepository;
+    private $subscriptionRepo;
     private $em;
 
-    public function __construct(UserRepository $userRepository, EntityManagerInterface $em)
+    public function __construct(UserRepository $userRepository, EntityManagerInterface $em, SubscriptionRepository $user_subscription)
     {
         $this->userRepository = $userRepository;
+        $this->subscriptionRepo = $user_subscription;
         $this->em = $em;
     }
 
     /**
      * @Rest\Get("/api/users")
-     * @Rest\View(serializerGroups={"user"})
+     * @Rest\View(serializerGroups={"userIndex"})
      */
     public function getApiUsers()
     {
@@ -45,6 +46,7 @@ class UserController extends AbstractFOSRestController
      * @param User $user
      * @param ConstraintViolationListInterface $validationErrors
      * @return View
+     * @Rest\View(serializerGroups={"userProfile"})
      * @ParamConverter("user", converter="fos_rest.request_body")
      */
     public function postApiUser(User $user, ConstraintViolationListInterface $validationErrors)
@@ -59,12 +61,11 @@ class UserController extends AbstractFOSRestController
                 $errors[] = ['message' => $message, 'propertyPath' => $propertyPath];
             }
         }
-
         if (!empty($errors)) {
             throw new BadRequestHttpException(\json_encode($errors));
         }
 
-
+        $user->setSubscription($this->subscriptionRepo->find($user->getSubscriptionId()));
         $this->em->persist($user);
         $this->em->flush();
         return $this->view($user);

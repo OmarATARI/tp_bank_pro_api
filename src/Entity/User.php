@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User implements UserInterface
 {
     /**
-     * @Groups("user")
+     * @Groups("userProfile")
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
@@ -25,65 +25,76 @@ class User implements UserInterface
     private $id;
 
     /**
-     * @Groups("user")
+     * @Groups("userIndex")
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
      * @Assert\Length(min=0, max=10)
      */
     private $firstName;
 
     /**
-     * @Groups("user")
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
      */
     private $lastName;
 
     /**
-     * @Groups("user")
+     * @Groups("userIndex")
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
      * @Assert\Email()
      */
     private $email;
 
     /**
-     * @Groups("user")
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
      */
     private $apiKey;
 
     /**
-     * @Groups("user")
+     * @Groups("userProfile")
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $address;
 
     /**
-     * @Groups("user")
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $country;
 
-    /**
-     * @Groups("user")
-     * @ORM\ManyToOne(targetEntity="App\Entity\Subscription", cascade={"persist"})
-     * @ORM\JoinColumn(nullable=false)
-
-     */
-    private $subscription;
 
     /**
-     * @Groups("user")
-     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="user", orphanRemoval=true)
+     * @Groups("userProfile")
+     * @Groups("userIndex")
+     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="user", orphanRemoval=true, cascade={"persist"})
      */
     private $cards;
 
     /**
-     * @Groups("user")
+     * @Groups("userProfile")
+     * @Groups("userIndex")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Subscription", cascade={"persist"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $subscription;
+
+    /**
+     * @var int $id_subscription
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    private $subscription_id;
+
+    /**
+     * @Groups("userProfile")
      * @ORM\Column(type="simple_array")
      */
     private $roles = [];
@@ -93,6 +104,7 @@ class User implements UserInterface
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
+        $this->createdAt = new \DateTime();
         $this->cards = new ArrayCollection();
     }
 
@@ -195,11 +207,28 @@ class User implements UserInterface
         return $this->subscription;
     }
 
-    public function setSubscription(?Subscription $subscription): self
+    /**
+     * @param mixed $subscription
+     */
+    public function setSubscription($subscription): void
     {
         $this->subscription = $subscription;
+    }
 
-        return $this;
+    /**
+     * @return int
+     */
+    public function getSubscriptionId(): int
+    {
+        return $this->subscription_id;
+    }
+
+    /**
+     * @param int $id_subscription
+     */
+    public function setSubscriptionId(int $id_subscription): void
+    {
+        $this->subscription_id = $id_subscription;
     }
 
     /**
@@ -238,8 +267,16 @@ class User implements UserInterface
 
     public function getRoles()
     {
-        // TODO: Implement getRoles() method.
+        return $this->roles;
     }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
 
     public function getPassword()
     {
@@ -261,10 +298,4 @@ class User implements UserInterface
         // TODO: Implement eraseCredentials() method.
     }
 
-    public function setRoles(array $roles): self
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
 }

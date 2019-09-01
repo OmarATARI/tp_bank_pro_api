@@ -15,23 +15,25 @@ class Subscription
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups("user")
+     * @Groups("userIndex")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("user")
+     * @Groups("userIndex")
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("userIndex")
      */
     private $slogan;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("userIndex")
      */
     private $url;
 

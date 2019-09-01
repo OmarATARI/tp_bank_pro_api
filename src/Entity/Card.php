@@ -18,29 +18,32 @@ class Card
     private $id;
 
     /**
+     * @Groups("userIndex")
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
-     * @Groups("user")
      */
     private $name;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
-     * @Groups("user")
      */
     private $creditCardType;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="string")
      */
     private $creditCardNumber;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
-     * @Groups("user")
      */
     private $currencyCode;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="integer")
      */
     private $value;
