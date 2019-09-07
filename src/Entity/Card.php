@@ -12,6 +12,7 @@ class Card
 {
     /**
      * @Groups("userProfile")
+     * @Groups("cardIndex")
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
@@ -21,35 +22,41 @@ class Card
     /**
      * @Groups("userIndex")
      * @Groups("userProfile")
+     * @Groups("cardIndex")
      * @ORM\Column(type="string", length=255)
      */
     private $name;
 
     /**
      * @Groups("userProfile")
+     * @Groups("cardIndex")
      * @ORM\Column(type="string", length=255)
      */
     private $creditCardType;
 
     /**
      * @Groups("userProfile")
+     * @Groups("cardIndex")
      * @ORM\Column(type="string")
      */
     private $creditCardNumber;
 
     /**
      * @Groups("userProfile")
+     * @Groups("cardIndex")
      * @ORM\Column(type="string", length=255)
      */
     private $currencyCode;
 
     /**
      * @Groups("userProfile")
+     * @Groups("cardIndex")
      * @ORM\Column(type="integer")
      */
     private $value;
 
     /**
+     * @Groups("cardIndex")
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="cards")
      * @ORM\JoinColumn(nullable=false)
      */

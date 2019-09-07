@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 
+use App\Entity\Subscription;
 use App\Entity\User;
 use App\Repository\SubscriptionRepository;
 use App\Repository\UserRepository;
@@ -13,7 +14,9 @@ use FOS\RestBundle\View\View;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -77,54 +80,51 @@ class UserProfileController extends AbstractFOSRestController
 
     // ==============================           AUTHENTICATED USER PART
 
-
     /**
-     * @Rest\Patch("/api/profile/{email}/edit")
-     * @param User $user
+     * @Rest\Patch("/api/profile/{email}")
      * @param Request $request
      * @param ValidatorInterface $validator
+     * @Rest\View(serializerGroups={"user"})
      * @return View
-     * @ParamConverter("user", converter="fos_rest.request_body")
      */
-    public function patchApiUser(User $user, Request $request, ValidatorInterface $validator)
+    public function patchApiUser(Request $request, ValidatorInterface $validator)
     {
+        $user = $this->getUser();
+        $attributes = ['firstname' => 'setFirstname',
+            'lastname' => 'setLastname',
+            'address' => 'setAddress',
+            'country' => 'setCountry',
+            'email' => 'setEmail'];
+
+        foreach($attributes as $attribute => $setter) {
+            if(is_null($request->get($attribute))) {
+                continue;
+            }
+            $user->$setter($request->request->get($attribute));
+        }
+
+        if($request->get('subscription')) {
+            $subscription = $this->em->getRepository(Subscription::class)->findOneBy(['id' => $request->request->get('subscription')]);
+            if(is_null($subscription)) {
+                throw new NotFoundHttpException('this subscription does not exist');
+            } else {
+                $user->setSubscription($subscription);
+            }
+        }
         $validationErrors = $validator->validate($user);
-        if($validationErrors->count() > 0){
+        if($validationErrors->count() > 0) {
             /** @var ConstraintViolation $constraintViolation */
-            foreach ($validationErrors as $constraintViolation){
-                // Returns the violation message. (Ex. This value should not be blank.)
+            foreach ($validationErrors as $constraintViolation) {
                 $message = $constraintViolation->getMessage();
-                // Returns the property path from the root element to the violation. (Ex. lastname)
                 $propertyPath = $constraintViolation->getPropertyPath();
                 $errors[] = ['message' => $message, 'propertyPath' => $propertyPath];
             }
         }
-
         if (!empty($errors)) {
-            throw new BadRequestHttpException(\json_encode($errors));
+            throw new BadRequestHttpException(json_encode( $errors));
         }
-
-        $attributes = [
-            'firstName' =>'setFirstName',
-            'lastName' =>'setLastName',
-            'address' =>'setAddress',
-            'country' =>'setCountry',
-            'subscription' => 'setSubscription'
-            ];
-
-        foreach ($attributes as $attributeName => $value) {
-            if($request->get($attributeName) == null) {
-                continue;
-            }
-            $user->setFirstName($request->get($attributeName));
-            $user->setLastName($request->get($attributeName));
-            $user->setAddress($request->get($attributeName));
-            $user->setCountry($request->get($attributeName));
-        }
-
-        $this->em->persist($user);
         $this->em->flush();
-        return $this->view($user);
+        return $this->view($user, Response::HTTP_ACCEPTED);
     }
 
 }
