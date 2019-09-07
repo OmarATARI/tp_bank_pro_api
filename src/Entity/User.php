@@ -5,13 +5,19 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @UniqueEntity("email")
  */
-class User
+class User implements UserInterface
 {
     /**
+     * @Groups("userProfile")
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
@@ -19,56 +25,89 @@ class User
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("userIndex")
+     * @Groups("userProfile")
+     * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=0, max=10)
      */
     private $firstName;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("userProfile")
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $lastName;
 
     /**
+     * @Groups("userIndex")
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255)
+     * @Assert\Email()
      */
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @Groups("userProfile")
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $apiKey;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $address;
 
     /**
+     * @Groups("userProfile")
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $country;
 
+
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Subscription")
+     * @Groups("userProfile")
+     * @Groups("userIndex")
+     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="user", orphanRemoval=true, cascade={"persist"})
+     */
+    private $cards;
+
+    /**
+     * @Groups("userProfile")
+     * @Groups("userIndex")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Subscription", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $subscription;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="user", orphanRemoval=true)
+     * @var int $id_subscription
+     * @ORM\Column(type="integer", nullable=false)
      */
-    private $cards;
+    private $subscription_id;
+
+    /**
+     * @Groups("userProfile")
+     * @ORM\Column(type="simple_array")
+     */
+    private $roles = [];
+
 
 
     public function __construct()
     {
+        $this->roles = array('ROLE_USER');
+        $this->createdAt = new \DateTime();
         $this->cards = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -111,6 +150,10 @@ class User
         return $this;
     }
 
+    /**
+     * @return string|null
+     * @Assert\NotBlank()
+     */
     public function getApiKey(): ?string
     {
         return $this->apiKey;
@@ -164,11 +207,28 @@ class User
         return $this->subscription;
     }
 
-    public function setSubscription(?Subscription $subscription): self
+    /**
+     * @param mixed $subscription
+     */
+    public function setSubscription($subscription): void
     {
         $this->subscription = $subscription;
+    }
 
-        return $this;
+    /**
+     * @return int
+     */
+    public function getSubscriptionId(): int
+    {
+        return $this->subscription_id;
+    }
+
+    /**
+     * @param int $id_subscription
+     */
+    public function setSubscriptionId(int $id_subscription): void
+    {
+        $this->subscription_id = $id_subscription;
     }
 
     /**
@@ -201,4 +261,41 @@ class User
 
         return $this;
     }
+
+
+    // ================================== UserInterface mandatory methods
+
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getUsername()
+    {
+        return $this->email;
+    }
+
+
+    public function getPassword()
+    {
+        // TODO: Implement getPassword() method.
+    }
+
+    public function getSalt()
+    {
+        // TODO: Implement getSalt() method.
+    }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
 }
